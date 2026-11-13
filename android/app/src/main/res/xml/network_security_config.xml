@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network security for release builds.
+
+  HTTPS streams work with no changes. Plain http:// streams are blocked on
+  Android 9+ unless their domain is listed below. Allow only the stream hosts
+  you actually use rather than enabling cleartext for all traffic.
+
+  To allow a host, uncomment the block and add one <domain> line per host:
+
+  <domain-config cleartextTrafficPermitted="true">
+      <domain includeSubdomains="true">streams.example.com</domain>
+  </domain-config>
+
+  Debug builds already allow cleartext (see src/debug/AndroidManifest.xml),
+  so they work with the Metro dev server and any test stream.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
