@@ -4,7 +4,7 @@ PODS:
     - hermes-engine/Pre-built (= 250829098.0.7)
   - hermes-engine/Pre-built (250829098.0.7)
   - lottie-ios (4.6.0)
-  - lottie-react-native (7.5.0):
+  - lottie-react-native (7.5.1):
     - hermes-engine
     - lottie-ios (= 4.6.0)
     - RCTRequired
@@ -2514,7 +2514,7 @@ SPEC CHECKSUMS:
   FBLazyVector: c12d2108050e27952983d565a232f6f7b1ad5e69
   hermes-engine: 22d6d42b8c31c6f4be0e149914c3a071b6d8f9ed
   lottie-ios: 8f959969761e9c45d70353667d00af0e5b9cadb3
-  lottie-react-native: 14e89002e1e3ec8f97f68b8b13a0d631593f767e
+  lottie-react-native: 2166a87c5ed845e700c8f0ee90e5d1da5f7601e2
   op-sqlite: 4a8ada2b2b5dde1b32abdb1dee91b8380bc7194b
   RCTDeprecation: 3280799c14232a56e5a44f92981a8ee33bc69fd9
   RCTRequired: 9854a51b0f65ccf43ea0b744df4d70fce339db32

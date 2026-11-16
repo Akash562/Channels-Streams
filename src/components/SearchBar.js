@@ -9,10 +9,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Search, X } from './icons';
-import { colors, radii } from '../theme/tokens';
+import { useStyles, useTheme } from '../theme/ThemeProvider';
+import { radii } from '../theme/tokens';
 
 /** Frosted search pill that glows violet while focused. */
 export const SearchBar = memo(function SearchBar({ value, onChangeText }) {
+  const { colors, isDark } = useTheme();
+  const styles = useStyles(makeStyles);
   const focus = useSharedValue(0);
 
   const onFocus = useCallback(() => {
@@ -22,17 +25,10 @@ export const SearchBar = memo(function SearchBar({ value, onChangeText }) {
     focus.value = withTiming(0, { duration: 260 });
   }, [focus]);
 
+  const { searchBorder, searchBorderFocus, searchBg, searchBgFocus } = colors;
   const frameStyle = useAnimatedStyle(() => ({
-    borderColor: interpolateColor(
-      focus.value,
-      [0, 1],
-      ['rgba(255,255,255,0.10)', 'rgba(167,139,250,0.9)'],
-    ),
-    backgroundColor: interpolateColor(
-      focus.value,
-      [0, 1],
-      ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.10)'],
-    ),
+    borderColor: interpolateColor(focus.value, [0, 1], [searchBorder, searchBorderFocus]),
+    backgroundColor: interpolateColor(focus.value, [0, 1], [searchBg, searchBgFocus]),
   }));
   const glowStyle = useAnimatedStyle(() => ({ opacity: focus.value }));
 
@@ -47,8 +43,9 @@ export const SearchBar = memo(function SearchBar({ value, onChangeText }) {
         onBlur={onBlur}
         placeholder="Search channels or categories"
         placeholderTextColor={colors.textFaint}
-        selectionColor={colors.violetSoft}
-        cursorColor={colors.violetSoft}
+        selectionColor={colors.accent}
+        cursorColor={colors.accent}
+        keyboardAppearance={isDark ? 'dark' : 'light'}
         returnKeyType="search"
         autoCorrect={false}
         autoCapitalize="none"
@@ -71,34 +68,36 @@ export const SearchBar = memo(function SearchBar({ value, onChangeText }) {
   );
 });
 
-const styles = StyleSheet.create({
-  frame: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    height: 52,
-    paddingHorizontal: 16,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-  },
-  glow: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: radii.lg,
-    boxShadow: '0 0 28px rgba(139,92,246,0.45)',
-  },
-  input: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '500',
-    paddingVertical: 0,
-  },
-  clear: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.textMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const makeStyles = ({ colors, isDark }) =>
+  StyleSheet.create({
+    frame: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      height: 52,
+      paddingHorizontal: 16,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      ...(isDark ? null : { boxShadow: colors.cardShadow }),
+    },
+    glow: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: radii.lg,
+      boxShadow: colors.focusGlow,
+    },
+    input: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '500',
+      paddingVertical: 0,
+    },
+    clear: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: colors.textMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

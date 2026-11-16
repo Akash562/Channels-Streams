@@ -9,6 +9,7 @@ export { default as Clapperboard } from 'lucide-react-native/icons/clapperboard'
 export { default as Disc3 } from 'lucide-react-native/icons/disc-3';
 export { default as Heart } from 'lucide-react-native/icons/heart';
 export { default as LayoutGrid } from 'lucide-react-native/icons/layout-grid';
+export { default as Moon } from 'lucide-react-native/icons/moon';
 export { default as Newspaper } from 'lucide-react-native/icons/newspaper';
 export { default as Pause } from 'lucide-react-native/icons/pause';
 export { default as Play } from 'lucide-react-native/icons/play';

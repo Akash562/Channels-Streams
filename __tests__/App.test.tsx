@@ -10,6 +10,11 @@ import { categories, filterChannels, channels } from '../src/data/channels';
 
 jest.useFakeTimers();
 
+const pressableByLabel = (root: ReactTestRenderer.ReactTestInstance, label: string) =>
+  root.findAll(
+    node => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function',
+  );
+
 test('renders the home screen with channels', async () => {
   let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
   await ReactTestRenderer.act(() => {
@@ -21,6 +26,31 @@ test('renders the home screen with channels', async () => {
     .map(node => [node.props.children].flat().join(''));
   expect(strings).toContain('Live TV');
   expect(strings).toContain('Test Music');
+
+  await ReactTestRenderer.act(() => {
+    renderer!.unmount();
+  });
+});
+
+test('starts in the light theme and toggles to dark and back', async () => {
+  let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+  await ReactTestRenderer.act(() => {
+    renderer = ReactTestRenderer.create(<App />);
+  });
+  const root = renderer!.root;
+
+  // Default is light, so the button offers dark.
+  expect(pressableByLabel(root, 'Switch to dark theme').length).toBeGreaterThan(0);
+
+  await ReactTestRenderer.act(() => {
+    pressableByLabel(root, 'Switch to dark theme')[0].props.onPress();
+  });
+  expect(pressableByLabel(root, 'Switch to light theme').length).toBeGreaterThan(0);
+
+  await ReactTestRenderer.act(() => {
+    pressableByLabel(root, 'Switch to light theme')[0].props.onPress();
+  });
+  expect(pressableByLabel(root, 'Switch to dark theme').length).toBeGreaterThan(0);
 
   await ReactTestRenderer.act(() => {
     renderer!.unmount();

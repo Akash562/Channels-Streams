@@ -7,17 +7,23 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { categoryIcon } from './categoryIcon';
-import { colors, gradients, radii, springs } from '../theme/tokens';
+import { useStyles, useTheme } from '../theme/ThemeProvider';
+import { gradients, radii, springs } from '../theme/tokens';
 import { haptic } from '../utils/haptics';
 
 const CHIP_HEIGHT = 40;
-const ROW_PADDING = 4;
+// Room inside the scroll area for the selected chip's glow, so it isn't cut
+// off into a hard-edged band. Pulled back with a negative margin so the
+// visible spacing stays the same.
+const GLOW_ROOM = 16;
 
 /**
  * Horizontally scrolling category filters. A glowing gradient pill springs
  * from the old chip to the new one, and the row scrolls to keep it in view.
  */
 export const CategoryChips = memo(function CategoryChips({ categories, active, onChange }) {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const scrollRef = useRef(null);
   const layouts = useRef({});
   const x = useSharedValue(0);
@@ -61,6 +67,7 @@ export const CategoryChips = memo(function CategoryChips({ categories, active, o
       ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroller}
       contentContainerStyle={styles.row}>
       <Animated.View pointerEvents="none" style={[styles.indicator, indicatorStyle]} />
       {categories.map(category => {
@@ -94,36 +101,38 @@ export const CategoryChips = memo(function CategoryChips({ categories, active, o
   );
 });
 
-const styles = StyleSheet.create({
-  row: {
-    paddingHorizontal: 20,
-    paddingVertical: ROW_PADDING,
-    gap: 8,
-  },
-  indicator: {
-    position: 'absolute',
-    left: 0,
-    top: ROW_PADDING,
-    height: CHIP_HEIGHT,
-    borderRadius: radii.pill,
-    experimental_backgroundImage: gradients.accent,
-    boxShadow: '0 6px 18px rgba(139,92,246,0.5)',
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    height: CHIP_HEIGHT,
-    paddingHorizontal: 16,
-    borderRadius: radii.pill,
-    backgroundColor: colors.glass,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorder,
-  },
-  chipSelected: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-  },
-  text: { color: colors.textMuted, fontSize: 14, fontWeight: '700' },
-  textSelected: { color: '#fff' },
-});
+const makeStyles = ({ colors, isDark }) =>
+  StyleSheet.create({
+    scroller: { marginVertical: -GLOW_ROOM + 4 },
+    row: {
+      paddingHorizontal: 20,
+      paddingVertical: GLOW_ROOM,
+      gap: 8,
+    },
+    indicator: {
+      position: 'absolute',
+      left: 0,
+      top: GLOW_ROOM,
+      height: CHIP_HEIGHT,
+      borderRadius: radii.pill,
+      experimental_backgroundImage: gradients.accent,
+      boxShadow: isDark ? '0 6px 14px rgba(139,92,246,0.5)' : '0 6px 14px rgba(139,92,246,0.32)',
+    },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+      height: CHIP_HEIGHT,
+      paddingHorizontal: 16,
+      borderRadius: radii.pill,
+      backgroundColor: colors.glass,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.glassBorderStrong,
+    },
+    chipSelected: {
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
+    },
+    text: { color: colors.textMuted, fontSize: 14, fontWeight: '700' },
+    textSelected: { color: '#fff' },
+  });

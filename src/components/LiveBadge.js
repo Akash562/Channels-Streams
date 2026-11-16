@@ -10,10 +10,21 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { colors } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeProvider';
 
-/** Red "LIVE" pill with a softly pulsing dot. */
-export const LiveBadge = memo(function LiveBadge({ label = 'LIVE', compact = false, style }) {
+/**
+ * Red "LIVE" pill with a softly pulsing dot.
+ * tone="onDark" keeps the dark-surface look in both themes (used over video
+ * and on the colored carousel cards).
+ */
+export const LiveBadge = memo(function LiveBadge({
+  label = 'LIVE',
+  compact = false,
+  tone = 'auto',
+  style,
+}) {
+  const { isDark } = useTheme();
+  const variant = tone === 'onDark' || isDark ? dark : light;
   const pulse = useSharedValue(0);
   const reduceMotion = useReducedMotion();
 
@@ -35,12 +46,12 @@ export const LiveBadge = memo(function LiveBadge({ label = 'LIVE', compact = fal
   }));
 
   return (
-    <View style={[styles.badge, compact && styles.compact, style]}>
+    <View style={[styles.badge, variant.badge, compact && styles.compact, style]}>
       <View style={styles.dotWrap}>
-        <Animated.View style={[styles.ring, ringStyle]} />
-        <View style={styles.dot} />
+        <Animated.View style={[styles.ring, variant.dot, ringStyle]} />
+        <View style={[styles.dot, variant.dot]} />
       </View>
-      <Text style={[styles.text, compact && styles.textCompact]}>{label}</Text>
+      <Text style={[styles.text, variant.text, compact && styles.textCompact]}>{label}</Text>
     </View>
   );
 });
@@ -54,20 +65,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,59,92,0.16)',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,59,92,0.55)',
   },
   compact: { paddingHorizontal: 7, paddingVertical: 3, gap: 5 },
   dotWrap: { width: 7, height: 7, alignItems: 'center', justifyContent: 'center' },
-  ring: {
-    position: 'absolute',
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.live,
-  },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.live },
-  text: { color: '#FFD3DB', fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
+  ring: { position: 'absolute', width: 7, height: 7, borderRadius: 4 },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  text: { fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
   textCompact: { fontSize: 10, letterSpacing: 1.2 },
+});
+
+const dark = StyleSheet.create({
+  badge: { backgroundColor: 'rgba(255,59,92,0.16)', borderColor: 'rgba(255,59,92,0.55)' },
+  dot: { backgroundColor: '#FF3B5C' },
+  text: { color: '#FFD3DB' },
+});
+
+const light = StyleSheet.create({
+  badge: { backgroundColor: 'rgba(225,29,72,0.09)', borderColor: 'rgba(225,29,72,0.35)' },
+  dot: { backgroundColor: '#E11D48' },
+  text: { color: '#BE123C' },
 });

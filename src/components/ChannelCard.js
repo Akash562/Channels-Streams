@@ -8,7 +8,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ChannelLogo } from './ChannelLogo';
 import { HeartButton } from './HeartButton';
-import { accentFor, colors, radii, springs, withAlpha } from '../theme/tokens';
+import { useStyles } from '../theme/ThemeProvider';
+import { accentFor, radii, springs, withAlpha } from '../theme/tokens';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const MAX_TILT = 14; // degrees
@@ -26,6 +27,7 @@ export const ChannelCard = memo(function ChannelCard({
   onToggleFavorite,
   animateEntry,
 }) {
+  const styles = useStyles(makeStyles);
   const size = useRef({ width: 1, height: 1 });
   const tiltX = useSharedValue(0);
   const tiltY = useSharedValue(0);
@@ -84,7 +86,7 @@ export const ChannelCard = memo(function ChannelCard({
           pointerEvents="none"
           style={[
             styles.glow,
-            { boxShadow: `0 0 0 1.5px ${withAlpha(from, 0.9)}, 0 14px 30px ${withAlpha(to, 0.45)}` },
+            { boxShadow: `0 0 0 1.5px ${withAlpha(from, 0.9)}, 0 14px 30px ${withAlpha(to, 0.4)}` },
             glowStyle,
           ]}
         />
@@ -116,37 +118,41 @@ export const ChannelCard = memo(function ChannelCard({
   );
 });
 
-const styles = StyleSheet.create({
-  cell: { flex: 1, padding: 6 },
-  card: {
-    borderRadius: radii.lg,
-    padding: 8,
-    backgroundColor: colors.glass,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorderStrong,
-  },
-  glow: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: radii.lg,
-  },
-  plate: {
-    height: 96,
-    borderRadius: radii.md,
-    backgroundColor: colors.plate,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  logo: { width: '78%', height: 64 },
-  meta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 10,
-    paddingLeft: 4,
-  },
-  metaText: { flex: 1, gap: 3 },
-  title: { color: colors.text, fontSize: 14, fontWeight: '700', letterSpacing: -0.1 },
-  groupRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dot: { width: 6, height: 6, borderRadius: 3 },
-  group: { color: colors.textMuted, fontSize: 12, fontWeight: '600' },
-});
+const makeStyles = ({ colors, isDark }) =>
+  StyleSheet.create({
+    cell: { flex: 1, padding: 6 },
+    card: {
+      borderRadius: radii.lg,
+      padding: 8,
+      backgroundColor: colors.card,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.cardBorder,
+      ...(isDark ? null : { boxShadow: colors.cardShadow }),
+    },
+    glow: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: radii.lg,
+    },
+    plate: {
+      height: 96,
+      borderRadius: radii.md,
+      backgroundColor: colors.plate,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.plateBorder,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    logo: { width: '78%', height: 64 },
+    meta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingTop: 10,
+      paddingLeft: 4,
+    },
+    metaText: { flex: 1, gap: 3 },
+    title: { color: colors.text, fontSize: 14, fontWeight: '700', letterSpacing: -0.1 },
+    groupRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    dot: { width: 6, height: 6, borderRadius: 3 },
+    group: { color: colors.textMuted, fontSize: 12, fontWeight: '600' },
+  });

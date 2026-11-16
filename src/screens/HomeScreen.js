@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -16,10 +16,12 @@ import { ChannelCard } from '../components/ChannelCard';
 import { FeaturedCarousel } from '../components/FeaturedCarousel';
 import { CompactHeader, EmptyState, HeroHeader, SectionHeader } from '../components/HomeHeader';
 import { SearchBar } from '../components/SearchBar';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { categoryIcon } from '../components/categoryIcon';
 import { categories, channels, featuredChannels, filterChannels } from '../data/channels';
 import { useFavorites } from '../hooks/useFavorites';
 import { PlayerModal } from '../player/PlayerModal';
+import { useTheme } from '../theme/ThemeProvider';
 import { space } from '../theme/tokens';
 
 /**
@@ -68,6 +70,7 @@ const ListHeader = memo(function ListHeader({
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { isDark } = useTheme();
   const scrollY = useSharedValue(0);
 
   const [search, setSearch] = useState('');
@@ -130,6 +133,11 @@ export function HomeScreen() {
 
   return (
     <View style={styles.root}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
       <AuroraBackground scrollY={scrollY} paused={!!player} />
 
       <Animated.FlatList
@@ -168,6 +176,7 @@ export function HomeScreen() {
       />
 
       <CompactHeader scrollY={scrollY} topInset={insets.top} channelCount={channels.length} />
+      <ThemeToggle style={[styles.toggle, { top: insets.top + 5 }]} />
 
       <PlayerModal
         channel={player?.channel ?? null}
@@ -183,6 +192,7 @@ export function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  toggle: { position: 'absolute', right: space.xl, zIndex: 20 },
   search: { paddingHorizontal: space.xl, marginBottom: space.md },
   columns: { paddingHorizontal: space.md },
 });

@@ -30,8 +30,11 @@ import {
 
 import { HeartButton } from '../components/HeartButton';
 import { LiveBadge } from '../components/LiveBadge';
-import { colors, gradients, radii } from '../theme/tokens';
+import { gradients, palettes, radii } from '../theme/tokens';
 import { haptic } from '../utils/haptics';
+
+// The player keeps its dark, cinematic look in both themes.
+const colors = palettes.dark;
 
 // Brightness is simulated with a black overlay, so it never goes fully dark.
 const MAX_DIM = 0.85;
@@ -307,7 +310,7 @@ function PlayerContent({ channel, playlist, onSelect, onClose, isFavorite, onTog
               <Text numberOfLines={1} style={styles.title}>
                 {channel.title}
               </Text>
-              <LiveBadge compact />
+              <LiveBadge compact tone="onDark" />
             </View>
             <Text style={styles.subtitle}>
               {channel.group}

@@ -9,19 +9,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Heart } from './icons';
-import { colors, springs } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeProvider';
+import { springs } from '../theme/tokens';
 import { haptic } from '../utils/haptics';
 
 /** Favorite toggle: squash-and-bounce on tap, plus a burst ring when favoriting. */
-export const HeartButton = memo(function HeartButton({
-  active,
-  onPress,
-  size = 18,
-  color = colors.textMuted,
-  style,
-}) {
+export const HeartButton = memo(function HeartButton({ active, onPress, size = 18, color, style }) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
   const burst = useSharedValue(1);
+  const outline = color ?? colors.textMuted;
 
   const handlePress = useCallback(() => {
     scale.value = withSequence(withTiming(0.68, { duration: 90 }), withSpring(1, springs.bouncy));
@@ -47,11 +44,14 @@ export const HeartButton = memo(function HeartButton({
       accessibilityLabel={active ? 'Remove from favorites' : 'Add to favorites'}
       accessibilityState={{ selected: active }}
       style={[styles.button, style]}>
-      <Animated.View pointerEvents="none" style={[styles.ring, ringStyle]} />
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.ring, { borderColor: colors.heart }, ringStyle]}
+      />
       <Animated.View style={iconStyle}>
         <Heart
           size={size}
-          color={active ? colors.heart : color}
+          color={active ? colors.heart : outline}
           fill={active ? colors.heart : 'transparent'}
           strokeWidth={2.2}
         />
@@ -74,6 +74,5 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: colors.heart,
   },
 });

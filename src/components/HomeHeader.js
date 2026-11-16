@@ -8,10 +8,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SearchX } from './icons';
 import { LiveBadge } from './LiveBadge';
-import { colors, space, type } from '../theme/tokens';
+import { useStyles, useTheme } from '../theme/ThemeProvider';
+import { space, type } from '../theme/tokens';
 
 /** Large title that drifts up and fades out as the list scrolls. */
 export const HeroHeader = memo(function HeroHeader({ scrollY, channelCount }) {
+  const styles = useStyles(makeStyles);
   const style = useAnimatedStyle(() => ({
     opacity: interpolate(scrollY.value, [0, 90], [1, 0], Extrapolation.CLAMP),
     transform: [
@@ -36,8 +38,12 @@ export const HeroHeader = memo(function HeroHeader({ scrollY, channelCount }) {
   );
 });
 
-/** Slim frosted bar that slides in once the large title has scrolled away. */
+/**
+ * Slim frosted bar that slides in once the large title has scrolled away.
+ * The right side is left free for the theme toggle, which floats above it.
+ */
 export const CompactHeader = memo(function CompactHeader({ scrollY, topInset, channelCount }) {
+  const styles = useStyles(makeStyles);
   const style = useAnimatedStyle(() => ({
     opacity: interpolate(scrollY.value, [70, 120], [0, 1], Extrapolation.CLAMP),
     transform: [
@@ -56,10 +62,12 @@ export const CompactHeader = memo(function CompactHeader({ scrollY, topInset, ch
 });
 
 export const SectionHeader = memo(function SectionHeader({ icon: Icon, title, meta }) {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   return (
     <View style={styles.section}>
       <View style={styles.sectionLeft}>
-        {Icon ? <Icon size={18} color={colors.violetSoft} strokeWidth={2.4} /> : null}
+        {Icon ? <Icon size={18} color={colors.accent} strokeWidth={2.4} /> : null}
         <Text style={styles.sectionTitle} accessibilityRole="header">
           {title}
         </Text>
@@ -70,10 +78,12 @@ export const SectionHeader = memo(function SectionHeader({ icon: Icon, title, me
 });
 
 export const EmptyState = memo(function EmptyState({ query }) {
+  const styles = useStyles(makeStyles);
+  const { colors } = useTheme();
   return (
     <Animated.View entering={FadeIn.duration(250)} style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <SearchX size={28} color={colors.violetSoft} strokeWidth={2} />
+        <SearchX size={28} color={colors.accent} strokeWidth={2} />
       </View>
       <Text style={styles.emptyTitle}>No channels found</Text>
       <Text style={styles.emptyText}>
@@ -83,53 +93,55 @@ export const EmptyState = memo(function EmptyState({ query }) {
   );
 });
 
-const styles = StyleSheet.create({
-  hero: { paddingHorizontal: space.xl, paddingTop: space.lg, paddingBottom: space.xl, gap: 8 },
-  eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  count: { ...type.caption, letterSpacing: 0.4 },
-  display: { ...type.display, marginTop: 4 },
-  subtitle: { color: colors.textMuted, fontSize: 15, fontWeight: '500' },
-  compact: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.scrim,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.glassBorder,
-    zIndex: 10,
-  },
-  compactRow: {
-    height: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: space.xl,
-  },
-  compactTitle: { ...type.title, fontSize: 18 },
-  section: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: space.xl,
-    marginTop: space.xl,
-    marginBottom: space.sm,
-  },
-  sectionLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionTitle: { ...type.title },
-  sectionMeta: { ...type.caption },
-  empty: { alignItems: 'center', paddingVertical: 48, paddingHorizontal: 32, gap: 10 },
-  emptyIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.glass,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.glassBorderStrong,
-    marginBottom: 4,
-  },
-  emptyTitle: { ...type.title, fontSize: 18 },
-  emptyText: { color: colors.textMuted, fontSize: 14, textAlign: 'center' },
-});
+const makeStyles = ({ colors, isDark }) =>
+  StyleSheet.create({
+    hero: { paddingHorizontal: space.xl, paddingTop: space.lg, paddingBottom: space.xl, gap: 8 },
+    eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    count: { ...type.caption, color: colors.textMuted, letterSpacing: 0.4 },
+    display: { ...type.display, color: colors.text, marginTop: 4 },
+    subtitle: { color: colors.textMuted, fontSize: 15, fontWeight: '500' },
+    compact: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.scrim,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.glassBorder,
+      zIndex: 10,
+      ...(isDark ? null : { boxShadow: '0 4px 16px rgba(60,40,140,0.06)' }),
+    },
+    compactRow: {
+      height: 50,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: space.xl,
+    },
+    compactTitle: { ...type.title, color: colors.text, fontSize: 18 },
+    section: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: space.xl,
+      marginTop: space.xl,
+      marginBottom: space.sm,
+    },
+    sectionLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    sectionTitle: { ...type.title, color: colors.text },
+    sectionMeta: { ...type.caption, color: colors.textMuted },
+    empty: { alignItems: 'center', paddingVertical: 48, paddingHorizontal: 32, gap: 10 },
+    emptyIcon: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.glass,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.glassBorderStrong,
+      marginBottom: 4,
+    },
+    emptyTitle: { ...type.title, color: colors.text, fontSize: 18 },
+    emptyText: { color: colors.textMuted, fontSize: 14, textAlign: 'center' },
+  });

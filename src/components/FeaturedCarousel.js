@@ -10,15 +10,20 @@ import Animated, {
 import { Play } from './icons';
 import { ChannelLogo } from './ChannelLogo';
 import { LiveBadge } from './LiveBadge';
-import { accentFor, colors, radii, withAlpha } from '../theme/tokens';
+import { useStyles, useTheme } from '../theme/ThemeProvider';
+import { accentFor, radii, withAlpha } from '../theme/tokens';
 
 const GAP = 14;
+// Vertical room inside the scroll area for the card shadows, so they fade out
+// softly instead of being cut off into a hard-edged band.
+const SHADOW_ROOM = 36;
 
 /**
  * 3D coverflow: the centered card faces forward while its neighbours rotate
  * away on the Y axis, shrink and dim. Swipe or tap; cards snap to center.
  */
 export const FeaturedCarousel = memo(function FeaturedCarousel({ data, onSelect }) {
+  const styles = useStyles(makeStyles);
   const { width: screenWidth } = useWindowDimensions();
   const itemWidth = Math.min(screenWidth * 0.74, 340);
   const snap = itemWidth + GAP;
@@ -43,6 +48,7 @@ export const FeaturedCarousel = memo(function FeaturedCarousel({ data, onSelect 
         disableIntervalMomentum
         onScroll={onScroll}
         scrollEventThrottle={16}
+        style={styles.scroller}
         contentContainerStyle={[styles.track, { paddingHorizontal: sidePadding }]}>
         {data.map((item, index) => (
           <CoverCard
@@ -62,6 +68,8 @@ export const FeaturedCarousel = memo(function FeaturedCarousel({ data, onSelect 
 });
 
 const CoverCard = memo(function CoverCard({ item, index, width, snap, scrollX, onSelect }) {
+  const styles = useStyles(makeStyles);
+  const { isDark } = useTheme();
   const [from, to] = accentFor(item.group);
   const height = Math.round(width * 0.6);
 
@@ -88,13 +96,13 @@ const CoverCard = memo(function CoverCard({ item, index, width, snap, scrollX, o
           styles.card,
           {
             height,
-            experimental_backgroundImage: `linear-gradient(140deg, ${withAlpha(from, 0.95)} 0%, ${withAlpha(to, 0.85)} 100%)`,
-            boxShadow: `0 18px 40px ${withAlpha(to, 0.35)}`,
+            experimental_backgroundImage: `linear-gradient(140deg, ${withAlpha(from, 0.95)} 0%, ${withAlpha(to, 0.88)} 100%)`,
+            boxShadow: `0 14px 28px ${withAlpha(to, isDark ? 0.35 : 0.28)}`,
           },
         ]}>
         <View style={styles.sheen} />
         <View style={styles.topRow}>
-          <LiveBadge />
+          <LiveBadge tone="onDark" />
           <Text style={styles.group}>{item.group}</Text>
         </View>
         <View style={styles.body}>
@@ -113,7 +121,7 @@ const CoverCard = memo(function CoverCard({ item, index, width, snap, scrollX, o
               {item.title}
             </Text>
             <View style={styles.watch}>
-              <Play size={13} color={colors.bg} fill={colors.bg} />
+              <Play size={13} color="#17142B" fill="#17142B" />
               <Text style={styles.watchText}>Watch now</Text>
             </View>
           </View>
@@ -124,73 +132,76 @@ const CoverCard = memo(function CoverCard({ item, index, width, snap, scrollX, o
 });
 
 const Pagination = memo(function Pagination({ count, snap, scrollX }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.dots}>
       {Array.from({ length: Math.min(count, 10) }, (_, index) => (
-        <Dot key={index} index={index} snap={snap} scrollX={scrollX} />
+        <Dot key={index} index={index} snap={snap} scrollX={scrollX} style={styles.dot} />
       ))}
     </View>
   );
 });
 
-const Dot = memo(function Dot({ index, snap, scrollX }) {
-  const style = useAnimatedStyle(() => {
+const Dot = memo(function Dot({ index, snap, scrollX, style }) {
+  const animatedStyle = useAnimatedStyle(() => {
     const input = [(index - 1) * snap, index * snap, (index + 1) * snap];
     return {
       width: interpolate(scrollX.value, input, [6, 22, 6], Extrapolation.CLAMP),
-      opacity: interpolate(scrollX.value, input, [0.35, 1, 0.35], Extrapolation.CLAMP),
+      opacity: interpolate(scrollX.value, input, [0.3, 1, 0.3], Extrapolation.CLAMP),
     };
   });
-  return <Animated.View style={[styles.dot, style]} />;
+  return <Animated.View style={[style, animatedStyle]} />;
 });
 
-const styles = StyleSheet.create({
-  track: { paddingVertical: 10 },
-  card: {
-    borderRadius: radii.xl,
-    padding: 16,
-    overflow: 'hidden',
-    justifyContent: 'space-between',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.28)',
-  },
-  sheen: {
-    ...StyleSheet.absoluteFillObject,
-    experimental_backgroundImage:
-      'linear-gradient(160deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 45%, rgba(0,0,0,0.28) 100%)',
-  },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  group: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-  },
-  body: { flexDirection: 'row', alignItems: 'flex-end', gap: 14 },
-  plate: {
-    width: 92,
-    height: 92,
-    borderRadius: radii.lg,
-    backgroundColor: colors.plate,
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-  },
-  logo: { width: 74, height: 60 },
-  info: { flex: 1, gap: 10 },
-  title: { color: '#fff', fontSize: 20, fontWeight: '800', letterSpacing: -0.4 },
-  watch: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radii.pill,
-    backgroundColor: '#fff',
-  },
-  watchText: { color: colors.bg, fontSize: 13, fontWeight: '800' },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 6 },
-  dot: { height: 6, borderRadius: 3, backgroundColor: '#fff' },
-});
+const makeStyles = ({ colors }) =>
+  StyleSheet.create({
+    scroller: { marginVertical: -SHADOW_ROOM + 10 },
+    track: { paddingVertical: SHADOW_ROOM },
+    card: {
+      borderRadius: radii.xl,
+      padding: 16,
+      overflow: 'hidden',
+      justifyContent: 'space-between',
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: 'rgba(255,255,255,0.28)',
+    },
+    sheen: {
+      ...StyleSheet.absoluteFillObject,
+      experimental_backgroundImage:
+        'linear-gradient(160deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 45%, rgba(0,0,0,0.28) 100%)',
+    },
+    topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    group: {
+      color: 'rgba(255,255,255,0.85)',
+      fontSize: 11,
+      fontWeight: '800',
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+    },
+    body: { flexDirection: 'row', alignItems: 'flex-end', gap: 14 },
+    plate: {
+      width: 92,
+      height: 92,
+      borderRadius: radii.lg,
+      backgroundColor: colors.plate,
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+    },
+    logo: { width: 74, height: 60 },
+    info: { flex: 1, gap: 10 },
+    title: { color: '#fff', fontSize: 20, fontWeight: '800', letterSpacing: -0.4 },
+    watch: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: radii.pill,
+      backgroundColor: '#fff',
+    },
+    watchText: { color: '#17142B', fontSize: 13, fontWeight: '800' },
+    dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 6 },
+    dot: { height: 6, borderRadius: 3, backgroundColor: colors.text },
+  });
